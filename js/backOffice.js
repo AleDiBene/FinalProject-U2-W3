@@ -1,91 +1,57 @@
-const footerDate = function () {
-  const year = document.getElementById("year");
-  year.innerText = new Date().getFullYear();
+const yearFooter = function () {
+  const date = document.getElementById("year");
+  date.innerText = new Date().getFullYear();
 };
 
-footerDate();
+yearFooter();
 
-class Photo {
-  constructor(_name, _description, _brand, _foto, _price) {
-    this.name = _name;
-    this.description = _description;
-    this.brand = _brand;
-    this.foto = _foto;
-    this.price = _price;
-  }
-}
+const submitForm = async () => {
+  const name = document.getElementById("name").value;
+  const description = document.getElementById("description").value;
+  const brand = document.getElementById("brand").value;
+  const imageUrl = document.getElementById("imageUrl").value;
+  const price = parseFloat(document.getElementById("price").value);
 
-const nameInput = document.getElementById("name");
-const descriptionInput = document.getElementById("description");
-const brandInput = document.getElementById("brand");
-const brandFoto = document.getElementById("foto");
-const priceInput = document.getElementById("price");
+  const product = {
+    name,
+    description,
+    brand,
+    imageUrl,
+    price,
+  };
 
-const eventsURL = "https://striveschool-api.herokuapp.com/api/product/";
+  if (!validateForm(product)) return;
 
-if (eventId) {
-  fetch(eventsURL + "/" + eventId)
-    .then((response) => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error("errore nella fetch");
-      }
-    })
-    .then((data) => {
-      nameInput.value = data.name;
-      descriptionInput.value = data.description;
-      brandInput.value = data.brand;
-      brandFoto.value = data.foto;
-      priceInput.value = data.price;
-    })
-    .catch((err) => console.log("ERRORE DEL RIPOPOLAMENTO DEL FORM", err));
-}
-
-const form = document.getElementById("event-form");
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const concert = new Photo(
-    nameInput.value,
-    descriptionInput.value,
-    brandInput.value,
-    brandFoto.value,
-    priceInput.value
+  const response = await fetch(
+    "https://striveschool-api.herokuapp.com/api/product/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RkMzI4MjM4MzRiZjAwMTUwMDA3MGQiLCJpYXQiOjE3NDI1NDk2MzQsImV4cCI6MTc0Mzc1OTIzNH0.0a6NnpNfykCr-IheAbc2RfSVRV9-sd0O3Sb7T4CRo4E",
+      },
+      body: JSON.stringify(product),
+    }
   );
 
-  console.log("Photo", Photo);
-
-  let methodToUse;
-  let URLtoUse;
-
-  if (eventId) {
-    methodToUse = "PUT";
-    URLtoUse = eventsURL + "/" + eventId;
+  if (response.ok) {
+    alert("Prodotto creato con successo!");
+    resetForm();
   } else {
-    methodToUse = "POST";
-    URLtoUse = eventsURL;
+    alert("Errore nella creazione del prodotto.");
   }
+};
 
-  fetch(URLtoUse, {
-    method: methodToUse,
-    body: JSON.stringify(Photo),
-    headers: {
-      Authorization:
-        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2N2RkMzI4MjM4MzRiZjAwMTUwMDA3MGQiLCJpYXQiOjE3NDI1NDk2MzQsImV4cCI6MTc0Mzc1OTIzNH0.0a6NnpNfykCr-IheAbc2RfSVRV9-sd0O3Sb7T4CRo4E",
-      "Content-Type": "application/json",
-    },
-  })
-    .then((response) => {
-      if (response.ok) {
-        alert("SALVATAGGIO COMPLETATO!");
+const validateForm = (product) => {
+  const { name, description, brand, imageUrl, price } = product;
+  if (!name || !description || !brand || !imageUrl || !price) {
+    alert("Tutti i campi sono obbligatori!");
+    return false;
+  }
+  return true;
+};
 
-        form.reset(); // svuoto il form
-      } else {
-        throw new Error("ricevuta response non ok dal backend");
-      }
-    })
-    .catch((err) => {
-      console.log("errore nel salvataggio!", err);
-    });
-});
+const resetForm = () => {
+  document.getElementById("productForm").reset();
+};
